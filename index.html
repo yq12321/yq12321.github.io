@@ -1,6 +1,743 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QQ群管理主义测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(22, 33, 62, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(100, 149, 237, 0.3);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=anime%20style%20dark%20background%20with%20geometric%20patterns%20and%20neon%20accents&image_size=landscape_16_9') no-repeat center center;
+            background-size: cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #ff6b6b;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        h2 {
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px rgba(78, 205, 196, 0.5);
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 10px;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #f0f0f0;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 12px;
+            background: rgba(71, 85, 105, 0.5);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            background: rgba(71, 85, 105, 0.8);
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: rgba(78, 205, 196, 0.3);
+            border-color: #4ecdc4;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+
+        .btn-submit {
+            background: linear-gradient(45deg, #f9ca24, #f0932b);
+            color: #1a1a2e;
+            font-size: 1.1em;
+            padding: 14px 30px;
+            border: 2px solid #f9ca24;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit.ready {
+            animation: pulse 1.5s infinite;
+        }
+
+        .btn-submit.ready:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(249, 202, 36, 0.5);
+        }
+
+        .btn-submit.btn-disabled {
+            background: rgba(71, 85, 105, 0.5);
+            color: #64748b;
+            border-color: transparent;
+            cursor: pointer;
+            transform: none;
+            box-shadow: none;
+            animation: none;
+        }
+
+        .btn-submit.btn-disabled:hover {
+            background: rgba(71, 85, 105, 0.7);
+            transform: none;
+            box-shadow: none;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(249, 202, 36, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(249, 202, 36, 0);
+            }
+        }
+
+        .submit-hint {
+            text-align: center;
+            color: #f9ca24;
+            font-size: 0.95em;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .submit-hint.visible {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .result-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+        }
+
+        .result-description {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .other-result {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4ecdc4;
+            text-align: left;
+        }
+
+        .other-result h3 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .other-result p {
+            font-size: 1em;
+            line-height: 1.5;
+            color: #e0e0e0;
+        }
+
+        .result-image {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(100, 149, 237, 0.5);
+            object-fit: cover;
+            display: block;
+        }
+
+        .result-image-fallback {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            box-shadow: 0 0 30px rgba(100, 149, 237, 0.5);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(71, 85, 105, 0.5);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .question-counter {
+            text-align: right;
+            margin-bottom: 20px;
+            color: #94a3b8;
+        }
+
+        .answered-count {
+            display: inline-block;
+            margin-left: 8px;
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 107, 107, 0.95);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-weight: bold;
+            z-index: 9999;
+            animation: toastIn 0.4s ease-out, toastOut 0.4s ease-in 2s forwards;
+            pointer-events: none;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.5);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .question {
+                font-size: 1.1em;
+            }
+
+            .navigation {
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 10px 18px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
 <body>
-  <h1>我的测试页面</h1>
+    <div class="container">
+        <div id="test-start" class="fade-in">
+            <h1>QQ群管理主义测试</h1>
+            <p style="text-align: center; margin-bottom: 30px; font-size: 1.1em;">回答以下30道日常情景题，了解你的QQ群管理风格倾向</p>
+            <button id="start-btn" class="btn btn-primary" style="display: block; margin: 0 auto;">开始测试</button>
+        </div>
+
+        <div id="test-container" style="display: none;">
+            <div class="question-counter">
+                问题 <span id="current-question">1</span>/30
+                <span class="answered-count">（已答：<span id="answered-count">0</span>/30）</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+            </div>
+            <div id="question-container" class="question-container">
+                <div class="question" id="question-text"></div>
+                <div class="options" id="options-container"></div>
+            </div>
+            <div class="navigation">
+                <button id="prev-btn" class="btn btn-secondary">⬅ 上一题</button>
+                <button id="submit-btn" class="btn btn-submit">📋 提交查看结果</button>
+            </div>
+            <div class="submit-hint" id="submit-hint"></div>
+        </div>
+
+        <div id="result-container" style="display: none;">
+            <div class="result-container">
+                <h1 class="result-title" id="result-title"></h1>
+                <p class="result-description" id="result-description"></p>
+                <div style="margin-top: 40px;">
+                    <h2>其他接近的结果</h2>
+                    <div id="other-results" style="margin-top: 20px;"></div>
+                </div>
+                <button id="restart-btn" class="btn btn-primary" style="margin-top: 40px;">🔄 重新测试</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 16种QQ群管理主义，添加了备用emoji
+        const results = [
+            { name: "无管理主义", description: "QQ群内不设置任何管理员，群主也主动放弃日常干预，任群内自由发展。", comment: "你是网络道家，无为而治，群里的自由灯塔！", emoji: "🌊" },
+            { name: "群主专制主义", description: "群主拥有绝对权力，不设其他管理员，并要求群内形成对群主个人意志的遵从与崇拜。", comment: "你是赛博皇帝，群即江山，朕的话就是圣旨！", emoji: "👑" },
+            { name: "贤能主义", description: "通过能力测验、选拔考试等方式筛选合格者，并据此任命管理员。", comment: "你是群内的伯乐，只选最有能力的管理人才！", emoji: "🎓" },
+            { name: "共同主义", description: "所有群成员均被赋予管理员身份，众人平等地参与群的管理事务。", comment: "你是群内的共产主义者，人人都是管理员，天下大同！", emoji: "🤝" },
+            { name: "保守主义", description: "主张维持本群当前的管理架构与氛围，反对进行激进或根本性的变革。", comment: "你是群内的老顽固，稳定压倒一切，拒绝任何改变！", emoji: "🏰" },
+            { name: "协作主义", description: "群主、管理员与普通成员彼此协商，共同讨论和决定群内管理事务。", comment: "你是群内的和事佬，凡事都要大家商量着来！", emoji: "🤗" },
+            { name: "代议制主义", description: "全体成员通过一人一票的方式选举出管理员，由当选者代表大家行使管理职权。", comment: "你是雅典公民，不投票手痒，民主的光芒照耀群聊！", emoji: "🗳️" },
+            { name: "直接投票主义", description: "群内的一切管理决策（如修改群规、踢人、设精等），均由全体成员直接投票决定，不经代表。", comment: "你是群内的直接民主践行者，大事小事都要投票！", emoji: "📮" },
+            { name: "老资历主义", description: "以入群时间的早晚为核心标准，来得越早的成员越优先或自动成为管理员。", comment: "你是群内的老资格，论资排辈是你的座右铭！", emoji: "🕰️" },
+            { name: "身份代表主义", description: "群内按不同身份、地域或兴趣划分群体，各群体推选代表，共同组成管理团队。", comment: "你是群内的联邦主义者，各个圈子都要有代表！", emoji: "🧑‍🤝‍🧑" },
+            { name: "亲信任用", description: "管理员全部由群主根据自己的亲疏关系任命，任人唯亲是其主要特征。", comment: "你是群内的任人唯亲派，朋友就是最好的管理员！", emoji: "🤝" },
+            { name: "技术统治", description: "以QQ机器人作为管理核心，通过预设的自动化程序执行群规、处理违规和维护秩序，尽可能减少人为干预。", comment: "你是群内的技术控，机器人管理才是未来！", emoji: "🤖" },
+            { name: "群规主义", description: "一切管理行为完全严格依照成文的群规进行，不讲人情、不做特殊变通，追求规则至上。", comment: "你是赛博法家，眼里不容沙，群规就是最高法律！", emoji: "📜" },
+            { name: "金钱授权主义", description: "成员需向群主提供金钱、红包或其他利益，以换取管理员权限。", comment: "你是QQ群里的重商主义者，有钱能使鬼推磨！", emoji: "💰" },
+            { name: "优绩主义", description: "根据成员对群的实质贡献（如内容产出、活跃气氛、资源分享等）来分配管理权，贡献越大越有资格参与管理。", comment: "你是群内的 meritocrat，贡献决定一切！", emoji: "🏆" },
+            { name: "买办主义", description: "由其他QQ群派人空降本群担任管理员，代表外部群及其利益来管理本群事务。", comment: "你是群内的买办，隔壁群的人来管理我们！", emoji: "🌍" }
+        ];
+
+        // 题目保持不变
+        const questions = [
+            { text: "1. 你建了个新群，刚拉了30个人进来。你的第一反应是？", options: ["把管理员按钮关掉，大家自由发挥，管它呢。", "自己戴上皇冠头衔，公告写上\"群主说到做到\"。", "发个公告说：\"想当管理的私聊我，发50红包优先考虑。\"", "把最早和自己一起建群的那两个老朋友设成管理。"] },
+            { text: "2. 群里有人发了一条带脏话的语音，你最可能怎么办？", options: ["把这事丢进管理群，几个管理员一块商量要不要踢。", "严格按照群规第7条，直接禁言10分钟，没得商量。", "发起一个全员投票，同意踢的发1，不同意的发2。", "放着不管，反正过会儿就被其他消息淹没了。"] },
+            { text: "3. 你想当你们班群的群主，你觉得最靠谱的方法是？", options: ["先当上管理员，慢慢让大家离不开我，再篡位。", "组织一场群主竞选，每人演讲两分钟，全员投票。", "给现任群主买杯奶茶，求他把群转让给我。", "我入群比现任群主还早三天，论资历我该上位。"] },
+            { text: "4. 新来的群友小明，一进群就发广告。你觉得该怎么做？", options: ["机器人自动检测到\"https://\"，直接把他踢了。", "让群里的校友、老乡、同事各自出个代表商量怎么处理。", "等他给群发了100块红包，再考虑要不要原谅他。", "看群规怎么写的，如果没写\"不许发广告\"，就只能算了。"] },
+            { text: "5. 群主说：\"我准备退位，想找个接班的人。\" 你觉得他最可能选谁？", options: ["那个天天在群里答疑解惑、分享资源的活雷锋。", "上一个群主安排过来、一直潜伏在我们群的管理员。", "跟群主一起打了三年王者荣耀的基友。", "组织一场管理员资格考试，第一名当群主。"] },
+            { text: "6. 群里吵起来了，A说B是杠精，B说A是喷子，你看着屏幕心想？", options: ["这时候就该群主出来拍板，一句话定乾坤。", "移步议事厅，大家一起投票决定把谁禁言。", "查一下群规\"吵架处理流程\"，逐条对照执行。", "把两个人先禁言，然后管理组开个会讨论怎么办。"] },
+            { text: "7. 有人申请当管理员，说：\"我入群四年了！\" 你心里想？", options: ["四年了还在潜水，凭啥当管理？", "论资排辈的话，确实该轮到他了。", "看看他这四年为群做了什么贡献再说。", "来个管理员竞选，让群里人投票决定要不要他。"] },
+            { text: "8. 你的群突然多了一个不认识的管理员，你的第一反应是？", options: ["肯定是群主老表的邻居的小孩。", "完了，我们群被隔壁群\"殖民\"了。", "赶紧翻聊天记录，看他通过了什么考试还是投票。", "这说明大家马上都是管理了，共产了。"] },
+            { text: "9. 群主在群里说：\"我要把群卖给一个有缘人。\" 你第一反应？", options: ["赶紧凑钱，看能不能把群买下来。", "发起抗议：\"群是大家的，你不能说卖就卖！\"", "问问群主有没有什么考试要求，我或许能考上。", "这有啥，群主自己建的群，他想卖就卖呗。"] },
+            { text: "10. 周末早上起来发现群里999+条消息，但没一个人被踢，你觉得这群的管理状态是？", options: ["无管理，绝对的放任自流。", "有群主但不管事，活得跟没有一样。", "铁拳统治，只是昨晚群主刚好没在。", "全靠群规自动运转，机器人管得很稳。"] },
+            { text: "11. 有人说：\"你们群的管理都是群主现实中的朋友，圈子真小。\" 你如何回应？", options: ["不然呢？难道让隔壁群的来当？", "人家玩得好才当管理，天经地义。", "我们该搞一次公平的管理员换届选举了。", "那我们每人交50块给群主，换个我们的人当管理？"] },
+            { text: "12. 群公告写满了长达5000字的群规，点开一看堪比法典。你的想法是？", options: ["这个群的群主一定很有安全感。", "这个群一定被群规主义统治着。", "违一条规就踢人，也太没意思了。", "其实群规再多也没用，关键看执行的谁。"] },
+            { text: "13. 群主把群名改成了\"XX帝国\"，头衔也改成\"皇帝\"，你的反应？", options: ["让他玩吧，反正群里大家只用来吹水。", "支持，这样的群主才有凝聚力。", "很不舒服，我们应该联名上书要求改革。", "看看他有没有设置满朝文武百官当管理员。"] },
+            { text: "14. 你想把另一个群的好朋友拉进来，但他担心被欺负，你会怎么说？", options: ["放心，这里没人管，自由得很。", "我们群有事都投票决定，不会乱踢人。", "我们管理员是考进来的，都很讲道理。", "群主是我兄弟，谁敢欺负你？"] },
+            { text: "15. 群里有人提议：\"我们该按兴趣爱好分小组，每个小组选一个代表管那一块。\" 你觉得？", options: ["很好，这叫身份代表制，很民主。", "麻烦，不如直接让群主指定几个铁杆。", "不好，这样容易拉帮结派，不如全员投票选管理。", "可以，但要经过群规修正案，三分之二投票通过才行。"] },
+            { text: "16. 你在群里的等级是\"潜水员\"，突然有一天发现自己是管理员了。你猜原因是？", options: ["群主手滑了，马上会被撤掉。", "我终于凭借发资源的数量升上来了。", "群主把所有人都设成了管理，普天同庆。", "我入群五年了，系统自动给我补的资历管理。"] },
+            { text: "17. 群主在群里测试自己新写的QQ机器人，机器人踢了三个人。你的反应？", options: ["好玩，支持群主把群完全交给机器人管。", "担忧，万一机器人抽风把我踢了怎么办。", "反对，凭什么让一个程序来决定人的去留。", "无所谓，毕竟群主说了算，机器人只是工具。"] },
+            { text: "18. 隔壁群的管理水平很高，你们群主请了一个人过来当你们群的管理，理由是？", options: ["我们群人才凋零，需要引进外援。", "我们跟隔壁群搞联谊，互派管理。", "群主欠隔壁群主一个人情，拿管理当谢礼。", "这就是买办，我们群被隔壁渗透了。"] },
+            { text: "19. 群内投票决定要不要开一个新分区。你发起的投票以2票之差输了，你会？", options: ["接受结果，下次投票再战。", "质疑投票的公正性，要求群主裁决。", "翻出群规，看投票结果是否达到规定比例。", "联合输了的人抵制这个决定，继续要求重投。"] },
+            { text: "20. 有人在群里发了一个木马链接，马上被秒踢了。你觉得这个秒踢最可能是谁干的？", options: ["负责监控的QQ机器人管理员。", "执行力超强的群规主义群主。", "一个有洁癖的管理员，看到链接就烦。", "某个正好在线的投票踢人发起者。"] },
+            { text: "21. 群主说：\"我看谁不爽就踢谁，这是我的群。\" 你觉得他说得？", options: ["有道理，但很过分。", "完全正确，群主就有这个权力。", "没道理，群规面前群主也没特权。", "不对，群是大家的，应该投票决定。"] },
+            { text: "22. 你朋友想建个群，问你该怎么招管理员。你建议？", options: ["别招管理，自己说了算最省心。", "设个考试，考过的人才有资格。", "直接把你现实好朋友全拉成管理。", "让大家投票选，最民主。"] },
+            { text: "23. 一个当了三年管理员的人，最近什么活都不干，你会？", options: ["发起弹劾投票，让他下台。", "念在他资历老，让他挂着算了。", "按群规\"管理员考核条款\"，撤掉他的管理。", "在管理群里委婉提醒他，如果还是不改就商量撤掉。"] },
+            { text: "24. 群主把管理位置明码标价：100块一个管理员，200块一个高级管理员。你觉得？", options: ["市场经济在群管理领域的伟大实践。", "这样做会让管理变成有钱人的玩具。", "如果群规允许的话，也没啥好说的。", "不如把这些钱收上来当群费给大家发红包。"] },
+            { text: "25. 群里同时有\"漫画党管理\"、\"小说党管理\"、\"游戏党管理\"，你觉得这群采用的是什么制度？", options: ["身份代表主义，各个圈子都有人管。", "亲信任用，群主在每个圈子里都安插了自己人。", "优绩主义，他们各自在领域里贡献最大。", "这不就是常见的圈子政治，各立山头。"] },
+            { text: "26. 你发现你们群的所有事务最终都得群主点头才能执行。哪怕芝麻小事也要等群主。这是？", options: ["群主专制主义的典型症状。", "协作主义走到了形式主义。", "群规主义对权力流程的顶格设计。", "群主被裹挟了，其实他也不想管那么多。"] },
+            { text: "27. 有一个群，群主失踪三年了，群没解散，也没管理员。这个奇迹靠的是？", options: ["群成员素质极高，自治了。", "群规完善到可以脱离人的管理自动运转。", "机器人还在忠实执行群主三年前留下的指令。", "其实有新群主了，但他也是无管理主义者。"] },
+            { text: "28. 群主在群里发了句：\"谁想当管理？\" 瞬间刷屏\"我我我\"。群主会怎么选？", options: ["挑他自己看着顺眼的那几个。", "设计一道难题，谁先答对谁当。", "发起一个投票，让大家自己选。", "设置一个门槛：进群满3年才行。"] },
+            { text: "29. 过年前，群里为了是否改群名、换头像吵起来了，各种意见都有。你觉得最好的解决方式是？", options: ["发起几个方案，大家投票决定。", "管理员开个会定下来，然后宣布。", "看群规有没有关于群名更换的流程。", "少数服从多数，直接在群里接龙表决。"] },
+            { text: "30. 你觉得一个理想中的QQ群，最重要的管理特质是什么？", options: ["自由，想说什么说什么，没有管理就是最好的管理。", "秩序，规则明确且严格执行，谁违规都不好使。", "公平，大事小事大家商量或投票，没有特权。", "效率，群主或智能系统能快速决策，不拖泥带水。"] }
+        ];
+
+        // 评分映射：每个选项对应一个主要主义（权重10）和一个次要主义（权重2），增加区分度
+        const optionToResult = [
+            // 问题1
+            [ [[0,10],[4,2]], [[1,10],[10,2]], [[13,10],[1,2]], [[10,10],[8,2]] ],
+            // 问题2
+            [ [[5,10],[7,2]], [[12,10],[4,2]], [[7,10],[3,2]], [[0,10],[11,2]] ],
+            // 问题3
+            [ [[14,10],[2,2]], [[6,10],[7,2]], [[13,10],[10,2]], [[8,10],[4,2]] ],
+            // 问题4
+            [ [[11,10],[9,2]], [[9,10],[5,2]], [[13,10],[1,2]], [[12,10],[0,2]] ],
+            // 问题5
+            [ [[14,10],[2,2]], [[15,10],[9,2]], [[10,10],[1,2]], [[2,10],[14,2]] ],
+            // 问题6
+            [ [[1,10],[7,2]], [[7,10],[6,2]], [[12,10],[5,2]], [[5,10],[12,2]] ],
+            // 问题7
+            [ [[4,10],[0,2]], [[8,10],[4,2]], [[14,10],[2,2]], [[7,10],[6,2]] ],
+            // 问题8
+            [ [[10,10],[1,2]], [[15,10],[4,2]], [[2,10],[14,2]], [[3,10],[0,2]] ],
+            // 问题9
+            [ [[13,10],[6,2]], [[7,10],[3,2]], [[2,10],[10,2]], [[1,10],[4,2]] ],
+            // 问题10
+            [ [[0,10],[11,2]], [[4,10],[0,2]], [[1,10],[12,2]], [[11,10],[12,2]] ],
+            // 问题11
+            [ [[15,10],[10,2]], [[10,10],[1,2]], [[6,10],[7,2]], [[13,10],[11,2]] ],
+            // 问题12
+            [ [[4,10],[12,2]], [[12,10],[4,2]], [[0,10],[3,2]], [[5,10],[7,2]] ],
+            // 问题13
+            [ [[4,10],[1,2]], [[1,10],[10,2]], [[7,10],[6,2]], [[3,10],[12,2]] ],
+            // 问题14
+            [ [[0,10],[7,2]], [[7,10],[3,2]], [[2,10],[14,2]], [[10,10],[1,2]] ],
+            // 问题15
+            [ [[9,10],[7,2]], [[10,10],[1,2]], [[7,10],[9,2]], [[12,10],[5,2]] ],
+            // 问题16
+            [ [[4,10],[0,2]], [[14,10],[2,2]], [[3,10],[7,2]], [[8,10],[4,2]] ],
+            // 问题17
+            [ [[11,10],[0,2]], [[4,10],[12,2]], [[6,10],[7,2]], [[1,10],[11,2]] ],
+            // 问题18
+            [ [[2,10],[15,2]], [[9,10],[5,2]], [[10,10],[1,2]], [[15,10],[4,2]] ],
+            // 问题19
+            [ [[7,10],[12,2]], [[1,10],[6,2]], [[12,10],[3,2]], [[5,10],[7,2]] ],
+            // 问题20
+            [ [[11,10],[7,2]], [[12,10],[1,2]], [[14,10],[2,2]], [[7,10],[3,2]] ],
+            // 问题21
+            [ [[4,10],[1,2]], [[1,10],[10,2]], [[12,10],[3,2]], [[7,10],[6,2]] ],
+            // 问题22
+            [ [[0,10],[2,2]], [[2,10],[6,2]], [[10,10],[1,2]], [[7,10],[6,2]] ],
+            // 问题23
+            [ [[7,10],[5,2]], [[8,10],[4,2]], [[12,10],[2,2]], [[5,10],[12,2]] ],
+            // 问题24
+            [ [[13,10],[4,2]], [[7,10],[3,2]], [[12,10],[1,2]], [[5,10],[14,2]] ],
+            // 问题25
+            [ [[9,10],[14,2]], [[10,10],[1,2]], [[14,10],[2,2]], [[4,10],[8,2]] ],
+            // 问题26
+            [ [[1,10],[5,2]], [[5,10],[12,2]], [[12,10],[4,2]], [[4,10],[0,2]] ],
+            // 问题27
+            [ [[0,10],[12,2]], [[12,10],[4,2]], [[11,10],[0,2]], [[3,10],[7,2]] ],
+            // 问题28
+            [ [[10,10],[2,2]], [[2,10],[14,2]], [[7,10],[6,2]], [[8,10],[4,2]] ],
+            // 问题29
+            [ [[7,10],[5,2]], [[5,10],[12,2]], [[12,10],[5,2]], [[7,10],[3,2]] ],
+            // 问题30
+            [ [[0,10],[12,2]], [[12,10],[1,2]], [[7,10],[6,2]], [[11,10],[1,2]] ]
+        ];
+
+        let currentQuestion = 0;
+        let answers = Array(30).fill(undefined);
+
+        const testStart = document.getElementById('test-start');
+        const testContainer = document.getElementById('test-container');
+        const resultContainer = document.getElementById('result-container');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestionElement = document.getElementById('current-question');
+        const answeredCountElement = document.getElementById('answered-count');
+        const progressFill = document.getElementById('progress-fill');
+        const submitHint = document.getElementById('submit-hint');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
+
+        function getAnsweredCount() {
+            return answers.filter(a => a !== undefined).length;
+        }
+
+        function updateSubmitButton() {
+            const answeredCount = getAnsweredCount();
+            const allAnswered = answeredCount === questions.length;
+            submitBtn.classList.remove('ready', 'btn-disabled');
+            if (allAnswered) {
+                submitBtn.classList.add('ready');
+                submitHint.classList.add('visible');
+                submitHint.textContent = '🎉 所有题目已完成！点击提交按钮查看你的管理主义倾向吧~';
+            } else if (answeredCount > 0) {
+                submitBtn.classList.add('btn-disabled');
+                submitHint.classList.add('visible');
+                submitHint.textContent = `📝 还有 ${questions.length - answeredCount} 道题未回答，全部完成后即可提交`;
+            } else {
+                submitBtn.classList.add('btn-disabled');
+                submitHint.classList.remove('visible');
+            }
+        }
+
+        function showToast(message) {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) existingToast.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2500);
+        }
+
+        startBtn.addEventListener('click', () => {
+            testStart.style.display = 'none';
+            testContainer.style.display = 'block';
+            currentQuestion = 0;
+            answers = Array(30).fill(undefined);
+            loadQuestion();
+            updateSubmitButton();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = Array(30).fill(undefined);
+            resultContainer.style.display = 'none';
+            testContainer.style.display = 'block';
+            submitBtn.classList.remove('ready', 'btn-disabled');
+            submitHint.classList.remove('visible');
+            loadQuestion();
+            updateSubmitButton();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+                updateSubmitButton();
+            }
+        });
+
+        submitBtn.addEventListener('click', () => {
+            const answeredCount = getAnsweredCount();
+            if (answeredCount < questions.length) {
+                const missing = questions.length - answeredCount;
+                showToast(`⚠️ 还有 ${missing} 道题未回答，请完成所有题目后再提交！`);
+                const firstUnanswered = answers.findIndex(a => a === undefined);
+                if (firstUnanswered >= 0) {
+                    currentQuestion = firstUnanswered;
+                    loadQuestion();
+                    updateSubmitButton();
+                }
+                return;
+            }
+            calculateResult();
+        });
+
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            questionText.textContent = question.text;
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                if (answers[currentQuestion] === index) {
+                    optionElement.classList.add('selected');
+                }
+                optionElement.addEventListener('click', () => {
+                    answers[currentQuestion] = index;
+                    document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                    optionElement.classList.add('selected');
+                    updateSubmitButton();
+
+                    setTimeout(() => {
+                        if (currentQuestion < questions.length - 1) {
+                            currentQuestion++;
+                            loadQuestion();
+                            updateSubmitButton();
+                        }
+                    }, 400);
+                });
+                optionsContainer.appendChild(optionElement);
+            });
+
+            currentQuestionElement.textContent = currentQuestion + 1;
+            answeredCountElement.textContent = getAnsweredCount();
+            progressFill.style.width = ((currentQuestion + 1) / questions.length) * 100 + '%';
+            prevBtn.disabled = currentQuestion === 0;
+            updateSubmitButton();
+
+            const questionContainer = document.getElementById('question-container');
+            questionContainer.classList.remove('fade-in');
+            void questionContainer.offsetWidth;
+            questionContainer.classList.add('fade-in');
+        }
+
+        function calculateResult() {
+            if (getAnsweredCount() < questions.length) {
+                showToast('⚠️ 请回答完所有题目后再提交！');
+                updateSubmitButton();
+                return;
+            }
+
+            let scores = Array(16).fill(0);
+
+            answers.forEach((answer, idx) => {
+                if (answer !== undefined && optionToResult[idx] && optionToResult[idx][answer]) {
+                    const mappings = optionToResult[idx][answer];
+                    mappings.forEach(item => {
+                        if (Array.isArray(item) && item.length >= 2) {
+                            const [resultIndex, weight] = item;
+                            if (resultIndex >= 0 && resultIndex < 16) {
+                                scores[resultIndex] += weight;
+                            }
+                        }
+                    });
+                }
+            });
+
+            // 增强区分度：将得分平方后计算百分比
+            const squaredScores = scores.map(s => s * s);
+            const totalSquared = squaredScores.reduce((a, b) => a + b, 0);
+            let rawPercents = squaredScores.map(s => totalSquared > 0 ? (s / totalSquared) * 100 : 0);
+
+            // 确保最高匹配度不低于70%，如果低于则提拉到70%
+            let maxRaw = Math.max(...rawPercents);
+            if (maxRaw < 70) {
+                const scale = 70 / maxRaw;
+                rawPercents = rawPercents.map(p => p * scale);
+                // 重新归一化到100%
+                const newTotal = rawPercents.reduce((a, b) => a + b, 0);
+                rawPercents = rawPercents.map(p => (p / newTotal) * 100);
+            }
+
+            // 构建结果数组并保留一位小数
+            const resultWithPercent = scores.map((score, index) => {
+                const percent = parseFloat(rawPercents[index].toFixed(1));
+                return {
+                    index,
+                    name: results[index].name,
+                    description: results[index].description,
+                    comment: results[index].comment,
+                    score,
+                    percent,
+                    emoji: results[index].emoji
+                };
+            }).sort((a, b) => b.percent - a.percent);
+
+            // 显示主结果
+            const top = resultWithPercent[0];
+            resultTitle.textContent = top.name + ' ' + top.emoji;
+            resultDescription.innerHTML = `<strong>${top.comment}</strong><br>${top.description} (匹配度: ${top.percent}%)`;
+
+            // 其他接近结果
+            const otherContainer = document.getElementById('other-results');
+            otherContainer.innerHTML = '';
+            for (let i = 1; i < Math.min(4, resultWithPercent.length); i++) {
+                const r = resultWithPercent[i];
+                if (r.percent === 0) continue;
+                const div = document.createElement('div');
+                div.className = 'other-result';
+                div.innerHTML = `
+                    <div style="display: flex; align-items: flex-start; gap: 15px;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; font-size: 20px;">${r.emoji}</div>
+                        <div>
+                            <h3>${r.name} (${r.percent}%)</h3>
+                            <p><strong>${r.comment}</strong></p>
+                            <p>${r.description}</p>
+                        </div>
+                    </div>`;
+                otherContainer.appendChild(div);
+            }
+
+            testContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            resultContainer.classList.add('fade-in');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
