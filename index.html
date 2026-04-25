@@ -334,7 +334,7 @@
         { name: "买办主义", description: "外群派人空降担任管理，代表外部利益。", comment: "跨群托管，本土失语", emoji: "🌍" }
     ];
 
-    // 题目（30道，保持原汁原味）
+    // 题目（30道）
     const questions = [
         { text: "1. 你建了个新群，刚拉了30个人进来。你的第一反应是？", options: ["把管理员按钮关掉，大家自由发挥，管它呢。", "自己戴上皇冠头衔，公告写上\"群主说到做到\"。", "发个公告说：\"想当管理的私聊我，发50红包优先考虑。\"", "把最早和自己一起建群的那两个老朋友设成管理。"] },
         { text: "2. 群里有人发了一条带脏话的语音，你最可能怎么办？", options: ["把这事丢进管理群，几个管理员一块商量要不要踢。", "严格按照群规第7条，直接禁言10分钟，没得商量。", "发起一个全员投票，同意踢的发1，不同意的发2。", "放着不管，反正过会儿就被其他消息淹没了。"] },
@@ -368,7 +368,7 @@
         { text: "30. 你觉得一个理想中的QQ群，最重要的管理特质是什么？", options: ["自由，想说什么说什么，没有管理就是最好的管理。", "秩序，规则明确且严格执行，谁违规都不好使。", "公平，大事小事大家商量或投票，没有特权。", "效率，群主或智能系统能快速决策，不拖泥带水。"] }
     ];
 
-    // ------------------- 均衡赋分核心 (保证每个主义最终潜在得分相等，随机均匀) -------------------
+    // ------------------- 均衡赋分核心 (每个主义总潜在得分一致) -------------------
     function buildBalancedMapping() {
         let majorRequired = new Array(16).fill(0);
         let minorRequired = new Array(16).fill(0);
@@ -455,7 +455,7 @@
         }
     }
 
-    function showToast(msg) {
+    function showToast(msg, isWarning = true) {
         let existing = document.querySelector('.toast');
         if(existing) existing.remove();
         let toast = document.createElement('div');
@@ -463,6 +463,18 @@
         toast.innerText = msg;
         document.body.appendChild(toast);
         setTimeout(() => toast?.remove(), 2800);
+    }
+
+    // 跳转到第一个未答题目（若没有未答则返回-1）
+    function jumpToFirstUnanswered() {
+        const firstMissing = answers.findIndex(a => a === undefined);
+        if (firstMissing !== -1) {
+            currentQuestion = firstMissing;
+            loadQuestion();
+            updateSubmitButton();
+            showToast(`⚠️ 第 ${firstMissing+1} 题未回答，请完成后再提交`, true);
+        }
+        return firstMissing;
     }
 
     function loadQuestion() {
@@ -501,24 +513,23 @@
     }
 
     function calculateResult() {
+        // 理论上调用前已确保全答，但再加一层防护
         if (getAnsweredCount() < 30) {
-            showToast(`⚠️ 还有 ${30 - getAnsweredCount()} 道题没答，完成后再提交吧`);
+            jumpToFirstUnanswered();
             return;
         }
         let scores = Array(16).fill(0);
         for (let qIdx = 0; qIdx < 30; qIdx++) {
             const ansIdx = answers[qIdx];
-            if (ansIdx === undefined) continue;
             const weightMaps = balancedOptionToResult[qIdx][ansIdx];
             for (let [resIdx, weight] of weightMaps) {
                 if (resIdx >= 0 && resIdx < 16) scores[resIdx] += weight;
             }
         }
-        // 平方增强区分度（仅用于排序，不展示百分比）
+        // 平方增强区分（仅用于排序）
         let squared = scores.map(s => s * s);
         let totalSq = squared.reduce((a,b)=>a+b,0);
         let percents = totalSq > 0 ? squared.map(s => (s / totalSq) * 100) : Array(16).fill(0);
-        // 确保最高倾向视觉舒适，但不展示在界面上
         let maxP = Math.max(...percents);
         if (maxP < 68 && totalSq > 0) {
             let factor = 68 / maxP;
@@ -529,11 +540,11 @@
         let resultList = scores.map((_, idx) => ({
             idx, name: results[idx].name, description: results[idx].description,
             comment: results[idx].comment, emoji: results[idx].emoji,
-            percent: percents[idx]   // 仅内部排序用，不输出到页面
+            percent: percents[idx]
         })).sort((a,b) => b.percent - a.percent);
 
         const top = resultList[0];
-        // 主结果：不显示任何百分比
+        // 主结果：不显示百分比
         resultTitle.innerHTML = `${top.name} ${top.emoji}`;
         resultDescription.innerHTML = `<strong>✨ ${top.comment}</strong><br><br>${top.description}`;
 
@@ -556,6 +567,19 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // 提交按钮逻辑：先检查未答，有则跳转；全答则计算结果
+    function onSubmitClick() {
+        const unansweredIndex = answers.findIndex(a => a === undefined);
+        if (unansweredIndex !== -1) {
+            currentQuestion = unansweredIndex;
+            loadQuestion();
+            updateSubmitButton();
+            showToast(`⚠️ 第 ${unansweredIndex+1} 题未作答，已自动跳转，请完成所有题目`, true);
+        } else {
+            calculateResult();
+        }
+    }
+
     // 事件绑定
     startBtn.addEventListener('click', () => {
         testStart.style.display = 'none';
@@ -576,7 +600,7 @@
     prevBtn.addEventListener('click', () => {
         if (currentQuestion > 0) { currentQuestion--; loadQuestion(); }
     });
-    submitBtn.addEventListener('click', () => calculateResult());
+    submitBtn.addEventListener('click', onSubmitClick);
 </script>
 </body>
 </html>
