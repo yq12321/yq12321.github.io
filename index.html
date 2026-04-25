@@ -1,1 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>QQ群管理主义测试 · 均衡版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Arial', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0b1120 0%, #111827 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: rgba(15, 25, 45, 0.85);
+            backdrop-filter: blur(2px);
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(78, 205, 196, 0.2);
+            padding: 28px 24px;
+            transition: all 0.2s;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.1rem;
+            margin-bottom: 18px;
+            background: linear-gradient(135deg, #ffb347, #ff6b6b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        h2 {
+            color: #4ecdc4;
+            margin: 20px 0 12px 0;
+            font-weight: 600;
+            border-left: 4px solid #4ecdc4;
+            padding-left: 14px;
+        }
+
+        .question-container {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 24px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            transition: all 0.2s;
+        }
+
+        .question {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            color: #f1f5f9;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 14px 18px;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #334155;
+            font-size: 0.95rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .option:hover {
+            background: #1e293b;
+            transform: translateX(5px);
+            border-color: #4ecdc4;
+        }
+
+        .option.selected {
+            background: #2d4a6e;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 8px rgba(78, 205, 196, 0.4);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin: 30px 0 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 26px;
+            border: none;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #1e293b;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, #ff6b6b, #f97316);
+            box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(120deg, #2c3e66, #1e2a44);
+            border: 1px solid #4ecdc4;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #f9ca24, #f39c12);
+            color: #0f172a;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .btn-submit.ready {
+            animation: pulseLight 1.8s infinite;
+            box-shadow: 0 0 12px #f9ca24;
+        }
+
+        .btn-submit.btn-disabled {
+            opacity: 0.65;
+            filter: grayscale(0.1);
+            animation: none;
+            box-shadow: none;
+        }
+
+        @keyframes pulseLight {
+            0% { box-shadow: 0 0 0 0 rgba(249, 202, 36, 0.6); }
+            70% { box-shadow: 0 0 0 12px rgba(249, 202, 36, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(249, 202, 36, 0); }
+        }
+
+        .submit-hint {
+            text-align: center;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            color: #facc15;
+            font-weight: 500;
+            display: none;
+        }
+
+        .submit-hint.visible {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #1e293b;
+            border-radius: 20px;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 8px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 20px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .question-counter {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #94a3b8;
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .result-title {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #ffdab9, #ffaa66);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin: 10px 0;
+        }
+
+        .result-description {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 28px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin: 20px 0;
+        }
+
+        .other-result {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            text-align: left;
+            border-left: 4px solid #ffb347;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .other-emoji {
+            font-size: 2.3rem;
+            background: #1e2a3e;
+            width: 56px;
+            height: 56px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444e6;
+            backdrop-filter: blur(8px);
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-weight: bold;
+            z-index: 999;
+            animation: fadeDown 0.3s ease-out, fadeOut 0.4s 2.3s forwards;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 640px) {
+            .container { padding: 18px; }
+            .question { font-size: 1.1rem; }
+            .option { padding: 10px 14px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div id="test-start" class="fade-in">
+        <h1>📀 QQ群管理主义测试</h1>
+        <p style="text-align: center; margin: 12px 0 20px; opacity: 0.8;">30道情景洞察 · 解码你的社群管理DNA</p>
+        <button id="start-btn" class="btn btn-primary" style="display: block; margin: 25px auto 0;">✨ 开启测试</button>
+    </div>
+
+    <div id="test-container" style="display: none;">
+        <div class="question-counter">
+            <span>📌 第 <span id="current-question">1</span> / 30</span>
+            <span>✅ 已答 <span id="answered-count">0</span> / 30</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="question-container" class="question-container">
+            <div class="question" id="question-text"></div>
+            <div class="options" id="options-container"></div>
+        </div>
+        <div class="navigation">
+            <button id="prev-btn" class="btn btn-secondary">◀ 上一题</button>
+            <button id="submit-btn" class="btn btn-submit">📊 查看结果</button>
+        </div>
+        <div class="submit-hint" id="submit-hint"></div>
+    </div>
+
+    <div id="result-container" style="display: none;">
+        <div class="result-container">
+            <h1 class="result-title" id="result-title"></h1>
+            <div class="result-description" id="result-description"></div>
+            <div style="margin-top: 30px;">
+                <h2 style="border-left-color: #f97316;">📌 相近管理光谱</h2>
+                <div id="other-results"></div>
+            </div>
+            <button id="restart-btn" class="btn btn-primary" style="margin-top: 30px;">🔄 重新测评</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ----- 16种管理主义 (名称/描述/金句/emoji)
+    const results = [
+        { name: "无管理主义", description: "群内不设管理员，群主放弃干预，完全野生社群。", comment: "网络道家，无为而治，自由灯塔", emoji: "🌊" },
+        { name: "群主专制主义", description: "群主拥有绝对权力，不设其他管理，个人意志高于一切。", comment: "赛博皇帝，群即江山，口含天宪", emoji: "👑" },
+        { name: "贤能主义", description: "通过考试、能力测试筛选管理员。", comment: "群内伯乐，只选最有能力的人才", emoji: "🎓" },
+        { name: "共同主义", description: "全员管理员，人人平等参与管理。", comment: "数字大同，人人都是管理员", emoji: "🤝" },
+        { name: "保守主义", description: "维持现有架构，反对激进变革。", comment: "稳定压倒一切，传统就是正义", emoji: "🏰" },
+        { name: "协作主义", description: "群主、管理、成员协商共治。", comment: "和事佬的艺术，凡事商量着办", emoji: "🤗" },
+        { name: "代议制主义", description: "全员投票选举管理员代表。", comment: "雅典公民，民主光芒照群聊", emoji: "🗳️" },
+        { name: "直接投票主义", description: "一切决策由全员投票决定。", comment: "直接民主狂徒，大事小事投一票", emoji: "📮" },
+        { name: "老资历主义", description: "入群时间决定管理权力。", comment: "化石级群员，论资排辈铁律", emoji: "🕰️" },
+        { name: "身份代表主义", description: "各圈子推选代表共同管理。", comment: "联邦架构，各个群体皆有发声", emoji: "🧑‍🤝‍🧑" },
+        { name: "亲信任用", description: "群主任命现实好友/亲信为管理。", comment: "任人唯亲，朋友即权力", emoji: "💞" },
+        { name: "技术统治", description: "QQ机器人自动化管理，极少人工干预。", comment: "赛博法锤，机器人铁面无私", emoji: "🤖" },
+        { name: "群规主义", description: "一切依照成文群规执行，不讲人情。", comment: "数字法家，群规即最高指令", emoji: "📜" },
+        { name: "金钱授权主义", description: "通过红包/付费换取管理权限。", comment: "重商群主，财富即权力", emoji: "💰" },
+        { name: "优绩主义", description: "根据贡献（活跃/资源/内容）分配管理权。", comment: "功绩至上，贡献决定话语权", emoji: "🏆" },
+        { name: "买办主义", description: "外群派人空降担任管理，代表外部利益。", comment: "跨群托管，本土失语", emoji: "🌍" }
+    ];
+
+    // 题目（30道，保持原汁原味）
+    const questions = [
+        { text: "1. 你建了个新群，刚拉了30个人进来。你的第一反应是？", options: ["把管理员按钮关掉，大家自由发挥，管它呢。", "自己戴上皇冠头衔，公告写上\"群主说到做到\"。", "发个公告说：\"想当管理的私聊我，发50红包优先考虑。\"", "把最早和自己一起建群的那两个老朋友设成管理。"] },
+        { text: "2. 群里有人发了一条带脏话的语音，你最可能怎么办？", options: ["把这事丢进管理群，几个管理员一块商量要不要踢。", "严格按照群规第7条，直接禁言10分钟，没得商量。", "发起一个全员投票，同意踢的发1，不同意的发2。", "放着不管，反正过会儿就被其他消息淹没了。"] },
+        { text: "3. 你想当你们班群的群主，你觉得最靠谱的方法是？", options: ["先当上管理员，慢慢让大家离不开我，再篡位。", "组织一场群主竞选，每人演讲两分钟，全员投票。", "给现任群主买杯奶茶，求他把群转让给我。", "我入群比现任群主还早三天，论资历我该上位。"] },
+        { text: "4. 新来的群友小明，一进群就发广告。你觉得该怎么做？", options: ["机器人自动检测到\"https://\"，直接把他踢了。", "让群里的校友、老乡、同事各自出个代表商量怎么处理。", "等他给群发了100块红包，再考虑要不要原谅他。", "看群规怎么写的，如果没写\"不许发广告\"，就只能算了。"] },
+        { text: "5. 群主说：\"我准备退位，想找个接班的人。\" 你觉得他最可能选谁？", options: ["那个天天在群里答疑解惑、分享资源的活雷锋。", "上一个群主安排过来、一直潜伏在我们群的管理员。", "跟群主一起打了三年王者荣耀的基友。", "组织一场管理员资格考试，第一名当群主。"] },
+        { text: "6. 群里吵起来了，A说B是杠精，B说A是喷子，你看着屏幕心想？", options: ["这时候就该群主出来拍板，一句话定乾坤。", "移步议事厅，大家一起投票决定把谁禁言。", "查一下群规\"吵架处理流程\"，逐条对照执行。", "把两个人先禁言，然后管理组开个会讨论怎么办。"] },
+        { text: "7. 有人申请当管理员，说：\"我入群四年了！\" 你心里想？", options: ["四年了还在潜水，凭啥当管理？", "论资排辈的话，确实该轮到他了。", "看看他这四年为群做了什么贡献再说。", "来个管理员竞选，让群里人投票决定要不要他。"] },
+        { text: "8. 你的群突然多了一个不认识的管理员，你的第一反应是？", options: ["肯定是群主老表的邻居的小孩。", "完了，我们群被隔壁群\"殖民\"了。", "赶紧翻聊天记录，看他通过了什么考试还是投票。", "这说明大家马上都是管理了，共产了。"] },
+        { text: "9. 群主在群里说：\"我要把群卖给一个有缘人。\" 你第一反应？", options: ["赶紧凑钱，看能不能把群买下来。", "发起抗议：\"群是大家的，你不能说卖就卖！\"", "问问群主有没有什么考试要求，我或许能考上。", "这有啥，群主自己建的群，他想卖就卖呗。"] },
+        { text: "10. 周末早上起来发现群里999+条消息，但没一个人被踢，你觉得这群的管理状态是？", options: ["无管理，绝对的放任自流。", "有群主但不管事，活得跟没有一样。", "铁拳统治，只是昨晚群主刚好没在。", "全靠群规自动运转，机器人管得很稳。"] },
+        { text: "11. 有人说：\"你们群的管理都是群主现实中的朋友，圈子真小。\" 你如何回应？", options: ["不然呢？难道让隔壁群的来当？", "人家玩得好才当管理，天经地义。", "我们该搞一次公平的管理员换届选举了。", "那我们每人交50块给群主，换个我们的人当管理？"] },
+        { text: "12. 群公告写满了长达5000字的群规，点开一看堪比法典。你的想法是？", options: ["这个群的群主一定很有安全感。", "这个群一定被群规主义统治着。", "违一条规就踢人，也太没意思了。", "其实群规再多也没用，关键看执行的谁。"] },
+        { text: "13. 群主把群名改成了\"XX帝国\"，头衔也改成\"皇帝\"，你的反应？", options: ["让他玩吧，反正群里大家只用来吹水。", "支持，这样的群主才有凝聚力。", "很不舒服，我们应该联名上书要求改革。", "看看他有没有设置满朝文武百官当管理员。"] },
+        { text: "14. 你想把另一个群的好朋友拉进来，但他担心被欺负，你会怎么说？", options: ["放心，这里没人管，自由得很。", "我们群有事都投票决定，不会乱踢人。", "我们管理员是考进来的，都很讲道理。", "群主是我兄弟，谁敢欺负你？"] },
+        { text: "15. 群里有人提议：\"我们该按兴趣爱好分小组，每个小组选一个代表管那一块。\" 你觉得？", options: ["很好，这叫身份代表制，很民主。", "麻烦，不如直接让群主指定几个铁杆。", "不好，这样容易拉帮结派，不如全员投票选管理。", "可以，但要经过群规修正案，三分之二投票通过才行。"] },
+        { text: "16. 你在群里的等级是\"潜水员\"，突然有一天发现自己是管理员了。你猜原因是？", options: ["群主手滑了，马上会被撤掉。", "我终于凭借发资源的数量升上来了。", "群主把所有人都设成了管理，普天同庆。", "我入群五年了，系统自动给我补的资历管理。"] },
+        { text: "17. 群主在群里测试自己新写的QQ机器人，机器人踢了三个人。你的反应？", options: ["好玩，支持群主把群完全交给机器人管。", "担忧，万一机器人抽风把我踢了怎么办。", "反对，凭什么让一个程序来决定人的去留。", "无所谓，毕竟群主说了算，机器人只是工具。"] },
+        { text: "18. 隔壁群的管理水平很高，你们群主请了一个人过来当你们群的管理，理由是？", options: ["我们群人才凋零，需要引进外援。", "我们跟隔壁群搞联谊，互派管理。", "群主欠隔壁群主一个人情，拿管理当谢礼。", "这就是买办，我们群被隔壁渗透了。"] },
+        { text: "19. 群内投票决定要不要开一个新分区。你发起的投票以2票之差输了，你会？", options: ["接受结果，下次投票再战。", "质疑投票的公正性，要求群主裁决。", "翻出群规，看投票结果是否达到规定比例。", "联合输了的人抵制这个决定，继续要求重投。"] },
+        { text: "20. 有人在群里发了一个木马链接，马上被秒踢了。你觉得这个秒踢最可能是谁干的？", options: ["负责监控的QQ机器人管理员。", "执行力超强的群规主义群主。", "一个有洁癖的管理员，看到链接就烦。", "某个正好在线的投票踢人发起者。"] },
+        { text: "21. 群主说：\"我看谁不爽就踢谁，这是我的群。\" 你觉得他说得？", options: ["有道理，但很过分。", "完全正确，群主就有这个权力。", "没道理，群规面前群主也没特权。", "不对，群是大家的，应该投票决定。"] },
+        { text: "22. 你朋友想建个群，问你该怎么招管理员。你建议？", options: ["别招管理，自己说了算最省心。", "设个考试，考过的人才有资格。", "直接把你现实好朋友全拉成管理。", "让大家投票选，最民主。"] },
+        { text: "23. 一个当了三年管理员的人，最近什么活都不干，你会？", options: ["发起弹劾投票，让他下台。", "念在他资历老，让他挂着算了。", "按群规\"管理员考核条款\"，撤掉他的管理。", "在管理群里委婉提醒他，如果还是不改就商量撤掉。"] },
+        { text: "24. 群主把管理位置明码标价：100块一个管理员，200块一个高级管理员。你觉得？", options: ["市场经济在群管理领域的伟大实践。", "这样做会让管理变成有钱人的玩具。", "如果群规允许的话，也没啥好说的。", "不如把这些钱收上来当群费给大家发红包。"] },
+        { text: "25. 群里同时有\"漫画党管理\"、\"小说党管理\"、\"游戏党管理\"，你觉得这群采用的是什么制度？", options: ["身份代表主义，各个圈子都有人管。", "亲信任用，群主在每个圈子里都安插了自己人。", "优绩主义，他们各自在领域里贡献最大。", "这不就是常见的圈子政治，各立山头。"] },
+        { text: "26. 你发现你们群的所有事务最终都得群主点头才能执行。哪怕芝麻小事也要等群主。这是？", options: ["群主专制主义的典型症状。", "协作主义走到了形式主义。", "群规主义对权力流程的顶格设计。", "群主被裹挟了，其实他也不想管那么多。"] },
+        { text: "27. 有一个群，群主失踪三年了，群没解散，也没管理员。这个奇迹靠的是？", options: ["群成员素质极高，自治了。", "群规完善到可以脱离人的管理自动运转。", "机器人还在忠实执行群主三年前留下的指令。", "其实有新群主了，但他也是无管理主义者。"] },
+        { text: "28. 群主在群里发了句：\"谁想当管理？\" 瞬间刷屏\"我我我\"。群主会怎么选？", options: ["挑他自己看着顺眼的那几个。", "设计一道难题，谁先答对谁当。", "发起一个投票，让大家自己选。", "设置一个门槛：进群满3年才行。"] },
+        { text: "29. 过年前，群里为了是否改群名、换头像吵起来了，各种意见都有。你觉得最好的解决方式是？", options: ["发起几个方案，大家投票决定。", "管理员开个会定下来，然后宣布。", "看群规有没有关于群名更换的流程。", "少数服从多数，直接在群里接龙表决。"] },
+        { text: "30. 你觉得一个理想中的QQ群，最重要的管理特质是什么？", options: ["自由，想说什么说什么，没有管理就是最好的管理。", "秩序，规则明确且严格执行，谁违规都不好使。", "公平，大事小事大家商量或投票，没有特权。", "效率，群主或智能系统能快速决策，不拖泥带水。"] }
+    ];
+
+    // ------------------- 均衡赋分核心 (保证每个主义最终潜在得分相等，随机均匀) -------------------
+    function buildBalancedMapping() {
+        let majorRequired = new Array(16).fill(0);
+        let minorRequired = new Array(16).fill(0);
+        for (let i = 0; i < 16; i++) {
+            if (i < 8) {
+                majorRequired[i] = 8;
+                minorRequired[i] = 5;
+            } else {
+                majorRequired[i] = 7;
+                minorRequired[i] = 10;
+            }
+        }
+        let majorPool = [];
+        let minorPool = [];
+        for (let i = 0; i < 16; i++) {
+            for (let j = 0; j < majorRequired[i]; j++) majorPool.push(i);
+            for (let j = 0; j < minorRequired[i]; j++) minorPool.push(i);
+        }
+        function deterministicShuffle(arr, seed = 42) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                seed = (seed * 9301 + 49297) % 233280;
+                const j = Math.floor((seed / 233280) * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+        let shuffledMajor = deterministicShuffle(majorPool, 101);
+        let shuffledMinor = deterministicShuffle(minorPool, 202);
+        const mapping = Array(30).fill().map(() => Array(4).fill().map(() => []));
+        let majorIdx = 0, minorIdx = 0;
+        for (let q = 0; q < 30; q++) {
+            for (let opt = 0; opt < 4; opt++) {
+                const mainId = shuffledMajor[majorIdx++];
+                let minorId = shuffledMinor[minorIdx++];
+                if (mainId === minorId) {
+                    minorId = shuffledMinor[(minorIdx) % shuffledMinor.length];
+                }
+                mapping[q][opt] = [[mainId, 10], [minorId, 2]];
+            }
+        }
+        return mapping;
+    }
+    const balancedOptionToResult = buildBalancedMapping();
+
+    // ---------- 全局变量 ----------
+    let currentQuestion = 0;
+    let answers = Array(30).fill(undefined);
+
+    // DOM 元素
+    const testStart = document.getElementById('test-start');
+    const testContainer = document.getElementById('test-container');
+    const resultContainer = document.getElementById('result-container');
+    const startBtn = document.getElementById('start-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const currentQuestionSpan = document.getElementById('current-question');
+    const answeredCountSpan = document.getElementById('answered-count');
+    const progressFill = document.getElementById('progress-fill');
+    const submitHint = document.getElementById('submit-hint');
+    const resultTitle = document.getElementById('result-title');
+    const resultDescription = document.getElementById('result-description');
+
+    function getAnsweredCount() { return answers.filter(a => a !== undefined).length; }
+
+    function updateSubmitButton() {
+        const answered = getAnsweredCount();
+        const allDone = answered === 30;
+        submitBtn.classList.remove('ready', 'btn-disabled');
+        if (allDone) {
+            submitBtn.classList.add('ready');
+            submitHint.classList.add('visible');
+            submitHint.textContent = '🎉 30题全部完成！点击“查看结果”解锁你的管理主义档案';
+        } else if (answered > 0) {
+            submitBtn.classList.add('btn-disabled');
+            submitHint.classList.add('visible');
+            submitHint.textContent = `📝 还剩 ${30 - answered} 题未答，答完即可解锁`;
+        } else {
+            submitBtn.classList.add('btn-disabled');
+            submitHint.classList.remove('visible');
+        }
+    }
+
+    function showToast(msg) {
+        let existing = document.querySelector('.toast');
+        if(existing) existing.remove();
+        let toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast?.remove(), 2800);
+    }
+
+    function loadQuestion() {
+        const qData = questions[currentQuestion];
+        questionText.textContent = qData.text;
+        optionsContainer.innerHTML = '';
+        qData.options.forEach((opt, idx) => {
+            const optDiv = document.createElement('div');
+            optDiv.className = 'option';
+            if (answers[currentQuestion] === idx) optDiv.classList.add('selected');
+            optDiv.textContent = opt;
+            optDiv.addEventListener('click', () => {
+                answers[currentQuestion] = idx;
+                document.querySelectorAll('.option').forEach(el => el.classList.remove('selected'));
+                optDiv.classList.add('selected');
+                updateSubmitButton();
+                if (currentQuestion < 29) {
+                    setTimeout(() => {
+                        currentQuestion++;
+                        loadQuestion();
+                        updateSubmitButton();
+                    }, 280);
+                }
+            });
+            optionsContainer.appendChild(optDiv);
+        });
+        currentQuestionSpan.textContent = currentQuestion + 1;
+        answeredCountSpan.textContent = getAnsweredCount();
+        progressFill.style.width = ((currentQuestion + 1) / 30) * 100 + '%';
+        prevBtn.disabled = (currentQuestion === 0);
+        const qContainer = document.getElementById('question-container');
+        qContainer.classList.remove('fade-in');
+        void qContainer.offsetWidth;
+        qContainer.classList.add('fade-in');
+        updateSubmitButton();
+    }
+
+    function calculateResult() {
+        if (getAnsweredCount() < 30) {
+            showToast(`⚠️ 还有 ${30 - getAnsweredCount()} 道题没答，完成后再提交吧`);
+            return;
+        }
+        let scores = Array(16).fill(0);
+        for (let qIdx = 0; qIdx < 30; qIdx++) {
+            const ansIdx = answers[qIdx];
+            if (ansIdx ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  ===  === undefined) continue;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            const weightMaps =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = balancedOptionToResult[qIdx][ansIdx];;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            for (let [resIdx, , weight] of weightMaps) {
+                if (resIdx >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >=  >= 0 &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  && resIdx <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  < 16) scores[resIdx] +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  +=  += weight;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            }
+        }
+        // 平方增强区分度（仅用于排序，不展示百分比）
+        let squared =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = scores................................map(s =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  => s *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  * s);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        let totalSq =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = squared................................reduce((a,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,b)=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>a++b,,++++++++b,,++++++b,,++++,,++++b,,++,,++,,++,,++b,,,,,,,,,,,,,,,,0);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        let percents =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = totalSq >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  > 0 ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ?  ? squared................................map(s =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  => (s /      /     /    /   /     /  /   / totalSq totalSqtotalSq totalSq totalSqtotalSq) *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  * 100) :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  : Array(16)................fill(0);;;;;;;;;;;;;;;;
+        // 确保最高倾向视觉舒适，但不展示在界面上
+        let maxP =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = Math................................max(................................................................................................percents);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        if (maxP <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  < 68 &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  && totalSq >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  > 0) {
+            let factor =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 68 /      /     /    /   /     /  /   / maxP;;;;;;;;;;;;;;;;
+            percents =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = percents................................map(p =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  => p *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  * factor);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            let newTotal =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = percents................................reduce((a,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,b)=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>=>a++b,,++++++++b,,++++++b,,++++,,++++b,,++,,++,,++,,++b,,,,,,,,,,,,,,,,0);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            percents =  =  =  =  =  =  =  = percents........map(p =>  =>  =>  =>  =>  =>  =>  => (p//newTotal)**100);;
+        }
+        let resultList =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = resultList =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = scores................................map((_, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , idx) =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  => ({
+            idx, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , name: : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : results[idx]................................name, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , description: : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : results[idx]................................description,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+            comment: : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : results[idx]................................comment, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , emoji: : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : results[idx]................................emoji,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+            percent: : percents[idx]   // 仅内部排序用，不输出到页面
+        }))................................sort((a,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,b) =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  => b................................percent -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - a................................percent);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+        const top =  = resultList[0];;
+        // 主结果：不显示任何百分比
+        resultTitle................................................................................................................................innerHTML =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = `${top................................................................................................................................name} ${top................................................................................................................................emoji}`;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        resultDescription................................................................................................................................innerHTML =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = `<strong>✨ ${top................................................................................................................................comment}</strong><br><br>${top................................................................................................................................description}`;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+        const otherContainer =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = document................................................................getElementById('other-results');;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        otherContainer..innerHTML =  = '';;
+        let showCount =  = 0;;
+        for (let i =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 1; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; i <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  < resultList................................................................length &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  &&  && showCount <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  <  < 3; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; i++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++) {
+            if (resultList[i]..percent >  > 3.0) {
+                const r =  = resultList[i];;
+                const div =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = document................................................................createElement('div');;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                div................................................................className =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 'other-result';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                div................................................................innerHTML =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = `<div class="other-emoji">${r................................................................emoji}</div>
+                                <div><strong style="color:#fed7aa;">${r................................................................name}</strong><br><span style="font-size:0.85rem;">${r................................................................comment}</span><br><span style="font-size:0.8rem; opacity:0.8;">${r................................................................description}</span></div>`;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                otherContainer..appendChild(div);;
+                showCount++;++;++;++;
+            }
+        }
+        testContainer................................style................................display =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 'none';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        resultContainer................................style................................display =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 'block';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        window................................scrollTo({ top: : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : 0, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , behavior: : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : : 'smooth' });;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    }
+
+    // 事件绑定
+    startBtn................................addEventListener('click', , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , () =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  => {
+        testStart................................style................................display =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 'none';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        testContainer................................style................................display =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 'block';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        currentQuestion =  =  =  = 0;;;;
+        answers =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = Array(30)................fill(undefined);;;;;;;;;;;;;;;;
+        loadQuestion();;;;
+        updateSubmitButton();;;;
+    });;;;
+    restartBtn................addEventListener('click', , , , , , , , , , , , , , , , () =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  => {
+        resultContainer................style................display =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 'none';;;;;;;;;;;;;;;;
+        testContainer................style................display =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = 'block';;;;;;;;;;;;;;;;
+        currentQuestion =  =  =  = 0;;;;
+        answers =  =  =  =  =  =  =  =  =  =  =  =  =  =  =  = Array(30)................fill(undefined);;;;;;;;;;;;;;;;
+        loadQuestion();;;;
+        updateSubmitButton();;;;
+    });;;;
+    prevBtn................addEventListener('click', , , , , , , , , , , , , , , , () =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  => {
+        if (currentQuestion >  >  >  >  >  >  >  >  >  >  >  >  >  >  >  > 0) { currentQuestion--; --; --; --; --; --; --; --; --; --; --; --; --; --; --; --; loadQuestion(); ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; }
+    });;;;
+    submitBtn................addEventListener('click', , , , , , , , , , , , , , , , () =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  =>  => calculateResult());;;;;;;;;;;;;;;;
+</script>
+</body>
+</html>
